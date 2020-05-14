@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Codie&#39;s Portfolio</title>
+    <link>/</link>
+    <description>Recent content on Codie&#39;s Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 01 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Python </title>
+      <link>/blog/python/</link>
+      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project2/</link>
+      <pubDate>Fri, 01 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project2/</guid>
+      <description>Introduction I choose the following data on firefighter demographics and exam scores used in deciding promotions. Included in this dataset are 5 variables and 118 observations from firefighters hoping to qualify for promotion to either Lieutenant or Captain in the New Haven, Connecticut fire department. 3 of the variables are numerical and 2 of the vairibles are categorical, with 1 of them having 3 categories and the other having the the potential to be binary.</description>
+    </item>
+    
+    <item>
+      <title>Project 1: Exploratory Data Analysis</title>
+      <link>/project1/</link>
+      <pubDate>Sun, 15 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project1/</guid>
+      <description>Introduction The two datasets that sparked my interest explore alcohol consumption and happiness by country. The first dataset was found using data.world and details the breakdown of consumption of different alcoholic beverage servings (per person in 2010) and total alchhol consumption in liters by country. The second dataset was found using kaggle.com, which was reccommended in class and details happiness score and rank by country along with asociated data. The reason that I chose these two datasets for this exploritory data analysis is because of my growing interest in food and other substances that people consume as it pertains to public health.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
+      
+      <guid>/projects/</guid>
+      <description>Projects Here are some projects I have recently completed:
+  Exploratory Data Analysis with Tidyverse Tools
+  Modeling, Testing, and Classification
+  </description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,158 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "Codie Price"
+date: '15 March 2020'
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(ggplot2)
+library(readxl)
+```
+
+
+##*Introduction*
+
+The two datasets that sparked my interest explore alcohol consumption and happiness by country. The first dataset was found using data.world and details the breakdown of consumption of different alcoholic beverage servings (per person in 2010) and total alchhol consumption in liters by country. The second dataset was found using kaggle.com, which was reccommended in class and details happiness score and rank by country along with asociated data. The reason that I chose these two datasets for this exploritory data analysis is because of my growing interest in food and other substances that people consume as it pertains to public health. The body and mind are intricately connected in such a way that what your body has available for fuel and nutrients has a paramount effect on brain chemistry and subsequently mood and general mental health. In this way, I was curious to see how alcohol consumption (which at a higher rate is not very good for the brain) correlates to world happiness; are countries that drink less alcohol actually happier? The Alcohol dataset has 5 Variables: Country, Beer Servings, Spirit Servings, Wine Servings, and Total Liters of Pure Alcohol. The data from the Alcohol dataset was gathered from the World Health Orginisation's Global Information System on Alcohol and Health. The World Happiness data set has 12 variables, so I will be looking at specific vairibales that have the most visual meaning. These include the following variables: Country, Region, Happines Score, Happiness Rank, GDP, Family, Health, and Freedom. This dataset was compiled from the 2015 World Happiness Report. 
+
+##*Joining/Merging*
+```{r}
+
+Alcohol <- read_csv("~/Alcohol.csv")
+
+Happiness<- read_csv("~/Happiness.csv")
+
+#As per the introduction these variables not of interest and need to be reomved.
+Happiness%>%select(-`Standard Error`,-`Dystopia Residual`,-Generosity,-`Trust (Government Corruption)`)->Happiness
+
+
+#Because there is most likely some variation between the two datasets in terms of 
+#the spellling of countries, it is necessary to assure that no countries are left out 
+#due to this variation before any type of joining is performed. 
+setdiff(Alcohol$country,Happiness$Country) 
+
+setdiff(Happiness$Country,Alcohol$country)
+
+
+#I found the following 3 countries to have variations in their spelling so I changed
+#their names in the Alcohol dataset to mach that of the spelling in the Happiness dataset. 
+
+Alcohol[185, "country"] <- "United States"
+
+Alcohol[22, "country"]<-"Bosnia and Herzegovina"
+
+Alcohol[22, "country"]<-"Trinidad and Tobago"
+
+#I decided to run a full-join to completley merge both data sets together to see how 
+#certain variables from both datasets might correlate and how these coorelations might
+#relate to each countries happiness rank.
+
+Alcohol%>%mutate(Country=country)%>%full_join(Happiness,by="Country")%>%select(-country)%>%na.omit->worlddata
+
+```
+##*Wrangling*
+
+The following are summary statistics that I was specifically interested to take a peak at. I use group_by() and summarize() for the majority of the summary statistics to help me analyze alcohol consumption and happiness by region and to find the mean and standard devaition of selected variables. These summary statistics functioned to help me see in a little more detail about what the data has to say about how alcohol consumtion and happiness relate to specific regions. For example, in one of the codes below we are able to see how countries in a certain region rank for happiness while also considering alcohol consumption.
+```{r}
+worlddata%>%na.omit%>%group_by(Region)%>%summarize(mean_happiness=mean(`Happiness Score`,na.rm = T),sd_happiness=sd(`Happiness Score`,na.rm = T))%>%arrange(desc(mean_happiness)) 
+
+worlddata%>%group_by(Region)%>%summarize(mean_beers=mean(beer_servings,na.rm = T),sd_beers=sd(beer_servings,na.rm=T))%>%arrange(desc(mean_beers))
+
+worlddata%>%group_by(Region)%>%summarize(mean_happiness_rank=mean(`Happiness Rank`,na.rm = T),sd_happiness_rank=sd(`Happiness Rank`,na.rm = T))%>%arrange(mean_happiness_rank)
+
+worlddata%>%group_by(Region)%>%summarize(mean_life_expectancy=mean(`Health (Life Expectancy)`),sd_life_expectancy=sd(`Health (Life Expectancy)`))
+
+worlddata%>%filter(Region=="Western Europe")%>%select(Country, `Happiness Rank`,total_litres_of_pure_alcohol)%>%arrange(`Happiness Rank`)
+
+worlddata%>%group_by(Country)%>%mutate(Total_servings=sum(beer_servings,spirit_servings,wine_servings))%>%group_by(Region)%>%select(Region,`Happiness Score`,Total_servings)%>%summarize(mean_total_servings=mean(Total_servings),mean_happiness_score=mean(`Happiness Score`))%>%arrange(desc(mean_happiness_score))
+
+worlddata%>%group_by(Country)%>%mutate(Total_servings=sum(beer_servings,spirit_servings,wine_servings))%>%group_by(Region)%>%select(Region,`Economy (GDP per Capita)`,Total_servings)%>%summarize(mean_total_servings=mean(Total_servings),mean_economy=mean(`Economy (GDP per Capita)`))%>%arrange(desc(mean_total_servings))
+
+```
+##*Visualization*
+
+The following graph relates the Mean Alcohol Servings and Mean Happiness Score for Each of the 8 Regions (Regions rather than countries are much easier to handle and visualize for this purpose). The Mean Alcohol Servings is the mean serving of each type of beverage (beer, spirit, and wine) combined. The graph shows that there is actually a positive, mostly linear correlation between Mean Happiness Score and Mean Alcohol Servings, that is to say that regions that consume more alcohol servings on average have a higher happiness score. My speculation that regions with higher alcohol comsumption would lead to less happiness does not hold here, but it is obvoius that countries more toward the top right quadrant of the graph are more developed so there are obviously many other factors that dictate happiness. 
+
+```{r}
+worlddata%>%group_by(Country)%>%mutate(Total_servings=sum(beer_servings,spirit_servings,wine_servings))%>%group_by(Region)%>%select(Region,`Happiness Score`,Total_servings)%>%summarize(mean_total_servings=mean(Total_servings),mean_happiness_score=mean(`Happiness Score`))%>%arrange(desc(mean_happiness_score))%>%ggplot(aes(x=mean_happiness_score, y=mean_total_servings,color=Region))+ scale_color_brewer(palette="RdYlBu")+ labs( x = "Mean Happiness Score", y = "Mean Alcohol Servings",title ="Relationship Between Happiness and Alcohol Consumption")+geom_point(size=8)+theme_minimal()+xlim(4,7.5)+ylim(0,600)
+```
+
+With what I noticed in the prevoius visualization, I thought it was important to graph happiness, life expectancy, and gdp per capita to see how these variabnles related to eachother independent of alcohol consumption. In the graph below, we can see that, in fact, countries with higher Happiness Scores have higher gdp per capita as well as higher life expectancy. 
+```{r}
+ggplot(worlddata,aes(x=worlddata$`Happiness Score`,y=worlddata$`Health (Life Expectancy)`,color=`Economy (GDP per Capita)`))+scale_color_gradient(low="gold", high="darkmagenta")+labs( x = "Happiness Score", y = "Life Expectancy",title ="Relationship Between Happiness Score and Life Expectancy")+geom_point(size=2.5,alpha=.8)+theme_minimal()
+```
+
+Just for fun because I prefer wine when I have a drink, I went with the following bar graph which shows the mean wine servings according to Region. From this graph we see that Australia and New Zealand and Western Europe have by far the highest consumption of wine at a little under 200 servings. In comparison, Southern Asia and the Middle East and Northern Africa have the lowest wine consumption at around 10 servings or less.
+```{r}
+ggplot(worlddata,aes(Region))+geom_bar(aes(y=worlddata$wine_servings,fill=Region),
+stat="summary", fun.y="mean")+scale_fill_brewer(palette = "RdYlBu")+scale_x_discrete(labels=c("ANZ","CEE","EA","LAC","MENA","NA","SEA","SA","SSA","WE"))+labs( x = "Region", y = "Wine Servings",title ="Average Wine Servings by World Region")+theme_minimal()
+```
+
+
+##*Dimensionality Reduction*
+```{r}
+summary(worlddata)
+
+#Here, I removed the variable Happiness Rank because it essentially gives us the same
+#information as Happiness Score but in a ranked form.
+worlddata%>%select(-`Happiness Rank`)->revisedworlddata
+
+worlddata_nums<-revisedworlddata%>%select_if(is.numeric)%>%scale
+
+rownames(worlddata_nums)<-revisedworlddata$Country
+
+worlddata_pca<-princomp(worlddata_nums)
+
+names(worlddata_pca)
+
+summary(worlddata_pca,loadings = T)
+
+eigval<-worlddata_pca$sdev^2
+
+#I decided to use the first two PC because their eigenvalues are greater 
+#than 1 in accordance with Kaiser's rule
+eigval
+
+#This allows for me to highlight that PC2 involves a sort of trade-off between 
+#the Freedom and Spirit Servings Variables. This could indicate that Countries 
+#with lower spirit servings have a higher feeling of freedom.
+#For PC1, I speculate that it is GDP and Freedom as they are the most distant
+#from each other.
+worlddata_pca$loadings[1:9,1:2]%>%as.data.frame%>%rownames_to_column%>%
+ggplot()+geom_hline(aes(yintercept=0),lty=2)+
+ geom_vline(aes(xintercept=0),lty=2)+ylab("PC2")+xlab("PC1")+
+ geom_segment(aes(x=0,y=0,xend=Comp.1,yend=Comp.2),arrow=arrow(),col="darkcyan")+
+ geom_label(aes(x=Comp.1*1.1,y=Comp.2*1.1,label=rowname))
+
+worlddatadf<-data.frame(PC1=worlddata_pca$scores[,1], PC2=worlddata_pca$scores[,2])
+
+ggplot(worlddatadf,aes(PC1, PC2))+geom_point()
+```
+
+The codes below show the top and bottom 5 countries in principle componet one, and the and bottom 5 countries in principle component 2.
+```{r}
+Country<-revisedworlddata$Country
+
+worlddata_pca$scores%>%as.data.frame%>%cbind(Country,.)%>%top_n(5,Comp.1)
+
+worlddata_pca$scores%>%as.data.frame%>%cbind(Country,.)%>%top_n(5,wt=desc(Comp.1))
+
+worlddata_pca$scores%>%as.data.frame%>%cbind(Country,.)%>%top_n(5,Comp.2)
+
+worlddata_pca$scores%>%as.data.frame%>%cbind(Country,.)%>%top_n(5,wt=desc(Comp.2))
+
+```
+

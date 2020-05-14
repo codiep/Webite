@@ -1,0 +1,343 @@
+---
+title: 'Project 2: Modeling, Testing, and Predicting'
+author: 'Codie Price: cap4497'
+date: '2020-05-01'
+output:
+  html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+
+##Introduction 
+
+I choose the following data on firefighter demographics and exam scores used in deciding promotions. Included in this dataset are 5 variables and 118 observations from firefighters hoping to qualify for promotion to either Lieutenant or Captain in the New Haven, Connecticut fire department. 3 of the variables are numerical and 2 of the vairibles are categorical, with 1 of them having 3 categories and the other having the the potential to be binary. The 5 variables are Race (Black, White or Hispanic) of the firefighter, desired position of the firefighter (Captain or Leut.), and the 3 Neumerical variables: Written score, Oral score, and Combined score. The Combined score variable is manipulated as it incorperates 60% of the Written exam score and 40% of the Oral exam score.
+
+```{R}
+install.packages("Stat2Data") 
+library(Stat2Data) 
+library(dplyr)
+library(tidyr)
+data(Ricci)
+
+```
+
+##Manova 
+
+```{R}
+library(ggplot2) 
+head(Ricci)
+
+man1 <- manova(cbind(Oral, Written) ~ Race, data = Ricci)
+# Ho:For Oral score and Written score, the means for each Race are equal.  
+# Ha:For Oral score or Written score, the mean differs for at least one Race.
+summary(man1)
+
+# Significant, so we reject the null meaning that there is some difference between
+# the means. To get a better look at what is going on with the variables, we are 
+# going to perform Univariate Anovas. 
+summary(aov(Oral ~ Race, data = Ricci))
+
+summary(aov(Written ~ Race, data = Ricci))
+
+# There is a significant difference in average Oral exam scores between 
+# races. There is also a significant difference for the written exam scores. 
+# A post hoc analysis will be run to see which groups differ specifically. 
+pairwise.t.test(Ricci$Oral, Ricci$Race, p.adj = "none")
+
+# There is a significant difference in oral Scores between Black and Hispanic
+# firefighters. There is also a significant difference between Hispanic and White
+# Firefighters. There is no significant difference between firefighters who 
+# are Black and White. This means that the group that stands out is the 
+# Hispanic firefighters when when it comes oral exam scores. 
+pairwise.t.test(Ricci$Written, Ricci$Race, p.adj = "none")
+
+# There is a significant difference between written scores for firefighters
+# who are balck and hispanic, and those who are black and white, but there 
+# is no significant difference when it comes to hispanic and white firefighters.
+# This means that the group that stands out is black firefighters; there is 
+# significant difference in Written scores for black firefighters. 
+
+# I have run 1 Manova, 2 Anovas, & 6 T-test (2 pair-wise T test, which is
+# equivalent to 6 as each one is looking at 3 categories). In total, 9 tests were
+# carried out. Since I conducted 6 hypothesis tests (Post-hoc), the probablity of 
+# having at least one type 1 error is 0.26490810937 (1-.95^6) bonferoni 
+# Correction. We will divide alpha of .05 by 6 to get a new alpha of .0833. 
+
+# The Assumptions for an Anova are Random Sample/Independent Observations, 
+# Independent Samples, Normal Distribution of each group, and Equal Variance. I
+# think one of the assumptions that might be broken in this case is the sample 
+# size of the Hispanic Firefighters, which is smaller in comparison to White and
+# Black Firefighters. Additionally, the variance of the samples is most likely 
+# affected since White Firefighters have a value which is nearly trippled that of 
+# the Hispanic #Firefighters. 
+Ricci %>% count(Race)
+
+
+
+
+```
+
+
+##Randomization Test
+
+```{R}
+# Ho: Oral Score is the same for all 3 Races.
+# Ha: Oral Score is different between all 3 Races. 
+# Since the Categorical Variable of Race has 3 categories, I found the mean for 
+# Black vs. White Firefighters, Black vs Hispanic Firefighters, and Hispanic vs 
+# White Firefighters. Then, I found the means for all 3 Races, added them 
+# together, and averaged the means of the means.
+
+rand_dist <- vector() 
+for (i in 1:5000) {
+    new <- data.frame(Oral = sample(Ricci$Oral), Race = Ricci$Race) 
+    rand_dist[i] <- ((mean(new[new$Race == "B", ]$Oral) - mean(new[new$Race ==
+        "H", ]$Oral)) + (mean(new[new$Race == "B", ]$Oral) - mean(new[new$Race == 
+        "W", ]$Oral)) + (mean(new[new$Race == "H", ]$Oral) - mean(new[new$Race == 
+        "W", ]$Oral)))
+} 
+{
+hist(rand_dist, main = "", ylab = "")
+abline(v = -0.1293487, col = "Blue")
+}
+
+mean(rand_dist > -0.1293487) * 2
+# Since the P-value is close to 1, we fail to reject the null hypopthesis. 
+# The data is not significant.
+
+
+
+
+
+
+
+
+
+```
+
+##Linear Regression 
+```{R}
+library(lmtest)
+library(sandwich)
+fit <- lm(Combine ~ Race + Written, data = Ricci) 
+summary(fit)
+
+ggplot(Ricci, aes(x = Written, y = Combine, group = Race)) + geom_point(aes(Color = Race)) + 
+  geom_smooth(method = "lm", formula = y ~ 1, fullrange = T, aes(color = Race)) + 
+  theme(legend.position = c(0.95, 0.15)) + xlab("")
+
+resids <- fit$residuals
+fitvals <- fit$fitted.values
+ggplot() + geom_point(aes(fitvals, resids)) + geom_hline(yintercept = 0, color = "Blue") 
+#linear.
+
+ggplot() + geom_qq(aes(sample = resids)) + geom_qq_line(aes(sample = resids))
+
+ks.test(resids, "pnorm", mean = 0, sd(resids))
+#P-value of .8641, so we fail to reject Ho.
+
+shapiro.test(resids) 
+#pvalue is .237 so we fail to reject Ho that the distribution is normal.
+
+# The test appears to meet all the assumptions but I am still going to recompute
+# the regression with robust standard errors.
+fit <- lm(Combine ~ Race + Written, data = Ricci)
+bptest(fit) 
+#Pvalue is not significant but I am still going to move foward with caution.
+
+summary(fit)$coef[, 1:2]
+
+coeftest(fit, vcov = vcovHC(fit))[, 1:2]
+
+# Looking at the changes in the standard error, they are very minor.
+# the R-squared value of .7858 is the proportion of variation in the response 
+# varible and the Adjusted R-squared is .7801, which should be more conservative.
+
+```
+
+##Bootstrapped Standard Error
+
+```{R}
+boot_dat <- Ricci[sample(nrow(Ricci), replace = TRUE),]
+fit2 <- lm(Combine ~ Race + Written, data = boot_dat)
+samp_distn <- replicate(5000, {
+    boot_dat <- Ricci[sample(nrow(Ricci), replace = TRUE), ]
+    fit2 <- lm(Combine ~ Race + Written, data = boot_dat)
+    coef(fit2)
+})
+summary(fit2)
+
+samp_distn %>% t %>% as.data.frame %>% summarise_all(sd) #Estimated SE
+
+samp_distn %>% t %>% as.data.frame %>% gather %>% group_by(key) %>% summarize(lower = 
+  quantile(value, 0.025), upper = quantile(value, 0.975))
+
+# When compairng the p-values from this section to those from above, the same 
+# p-values that were significant above are still significant here. Furthermore, the 
+# only p-value that is not significnat is for the White Firefighters. When looking at
+# the Standard Errors, they seem to get smaller with each test that is performed. 
+
+```
+##Logistic Regression 
+
+```{R}
+library(plotROC)
+
+Ricci$Position <- ifelse(Ricci$Position == "Captain", 1, 0)
+fit3 <- glm(Position ~ Race + Oral + Written, data = Ricci, family = binomial(link = "logit")) 
+coeftest(fit3)
+
+# Oral exam score is significant, meaning that it increases the log-odds of 
+# Position. So, we assume that the better the oral score the firefighters have 
+# makes them more likely to be promoted. 
+probs <- predict(fit3, type = "response")
+mean(probs > 0.99)
+
+class_diag <- function(probs, truth) {
+    tab <- table(factor(probs > 0.5, levels = c("FALSE", "TRUE")), truth)
+    acc = sum(diag(tab))/sum(tab) 
+    sens = tab[2, 2]/colSums(tab)[2] 
+    spec = tab[1, 1]/colSums(tab)[1] 
+    ppv = tab[2, 2]/rowSums(tab)[2] 
+    if (is.numeric(truth) == FALSE & is.logical(truth) == FALSE)
+        truth <- as.numeric(truth) - 1
+    ord <- order(probs, decreasing = TRUE)
+    probs <- probs[ord]
+    truth <- truth[ord]
+    TPR = cumsum(truth)/max(1, sum(truth))
+    FPR = cumsum(!truth)/max(1, sum(!truth))
+    dup <- c(probs[-1] >= probs[-length(probs)], FALSE)
+    TPR <- c(0, TPR[!dup], 1)
+    FPR <- c(0, FPR[!dup], 1)
+    n <- length(TPR)
+    auc <- sum(((TPR[-1] + TPR[-n])/2) * (FPR[-1] - FPR[-n])) 
+    data.frame(acc, sens, spec, ppv, auc)
+}
+class_diag(probs, Ricci$Position)
+
+table(predict = as.numeric(probs > 0.5), truth = Ricci$Position) %>% addmargins
+
+8/41 #TPR/Sens
+
+69/77 #TNR/Spec
+
+(69 + 8)/118 #Accuracy
+
+# With the AUC being .664, this makes for a pretty bad fit; with the currrent
+# fit, it is highly likely that we would be  misclasssifying things. The true
+# positive rate is .195, the true negative rate is .896, and the accuracy is .653,
+# making this a really poor model.
+ROCplot <- ggplot(Ricci) + geom_roc(aes(d = Ricci$Position, m = predict(fit3, 
+  type = "response")), n.cuts = 0) 
+
+ROCplot
+
+calc_auc(ROCplot)
+# The AUC here is the same as that from above. Again, this AUC value makes for a poor 
+# represetative model. Additionaly, the structure of the graph makes it hard to predict 
+# Position with that we decided to use.
+
+#10-fold
+set.seed(1234) 
+k = 10
+
+data1 <- Ricci[sample(nrow(Ricci)), ]
+folds <- cut(seq(1:nrow(Ricci)), breaks = k, labels = FALSE) 
+diags <- NULL
+
+for (i in 1:k) {
+train <- data1[folds != i, ] 
+test <- data1[folds == i, ] 
+truth2 <- test$Position
+fit4 <- glm(Position ~ Race + Oral + Written, data = train, family = "binomial")
+probs2 <- predict(fit4, newdata = test, type = "response")
+diags <- rbind(diags, class_diag(probs2, truth2)) 
+}
+apply(diags, 2, mean)
+# Here, there is a change in Accuarcy and TPR; they both decrease which means
+# that this new model still is not a good fit. Furthermore, the AUC also decreased
+# meaning that these predictors are still not a great way of predicting Postion.
+
+```
+##Lasso
+
+```{R}
+fit5 <- lm(Combine ~ ., data = Ricci) 
+summary(fit5)
+
+library(glmnet)
+y <- as.matrix(Ricci$Position)
+x <- model.matrix(fit5)[, -1]
+x <- scale(x)
+cv <- cv.glmnet(x, y, family = "binomial")
+lasso <- glmnet(x, y, family = "binomial", lambda = cv$lambda.1se) 
+coef(lasso)
+
+# position is the only variable with a value next to it so it will be used in the 
+# 10 fold CV in the following part.
+set.seed(1234)
+data2 <- Ricci[sample(nrow(Ricci)), ]
+folds <- cut(seq(1:nrow(Ricci)), breaks = k, labels = FALSE)
+
+diags <- NULL 
+for (i in 1:k) {
+train2 <- data2[folds != i, ] 
+test2 <- data2[folds == i, ] 
+truth3 <- test2$Combine
+
+fit6 <- lm(Combine ~ Position, data = train2)
+probs4 <- predict(fit6, newdata = test2, type = "response") 
+preds <- ifelse(probs4 > 0.5, 1, 0)
+
+diags <- rbind(diags, class_diag(probs4, truth3)) 
+}
+diags %>% summarize_all(mean)
+
+summary(fit5)
+
+summary(fit6)
+
+# Since the response is a numeric value, I will use the Residual Standard Error
+# from fit 5 to compare it to the lasso fit, which is fit 6. In fit 5 I wanted to see if 
+# the Combine score was predicted well by all the other variables. Once performing a Lasso 
+# the only varible that was reported was position. A 10 fold CV was then performed on the 
+# Combine Score only accounting for postion. The residual standard error is of fit 6 is
+# 9.102 which is greater than that of fit 5, which was 4.084e-15. Since the value here was 
+# higher, it is not a better fit.
+
+
+
+
+
+
+```
+
+
+
+```{R eval=F}
+data(package = .packages(all.available = TRUE))
+```
+
+
+
+
+
+

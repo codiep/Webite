@@ -1,0 +1,402 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "Codie Price"
+date: '2020-03-15'
+output:
+  html_document
+---
+
+
+
+<div id="introduction" class="section level2">
+<h2><em>Introduction</em></h2>
+<p>The two datasets that sparked my interest explore alcohol consumption and happiness by country. The first dataset was found using data.world and details the breakdown of consumption of different alcoholic beverage servings (per person in 2010) and total alchhol consumption in liters by country. The second dataset was found using kaggle.com, which was reccommended in class and details happiness score and rank by country along with asociated data. The reason that I chose these two datasets for this exploritory data analysis is because of my growing interest in food and other substances that people consume as it pertains to public health. The body and mind are intricately connected in such a way that what your body has available for fuel and nutrients has a paramount effect on brain chemistry and subsequently mood and general mental health. In this way, I was curious to see how alcohol consumption (which at a higher rate is not very good for the brain) correlates to world happiness; are countries that drink less alcohol actually happier? The Alcohol dataset has 5 Variables: Country, Beer Servings, Spirit Servings, Wine Servings, and Total Liters of Pure Alcohol. The data from the Alcohol dataset was gathered from the World Health Orginisation’s Global Information System on Alcohol and Health. The World Happiness data set has 12 variables, so I will be looking at specific vairibales that have the most visual meaning. These include the following variables: Country, Region, Happines Score, Happiness Rank, GDP, Family, Health, and Freedom. This dataset was compiled from the 2015 World Happiness Report.</p>
+</div>
+<div id="joiningmerging" class="section level2">
+<h2><em>Joining/Merging</em></h2>
+<pre class="r"><code>Alcohol &lt;- read_csv(&quot;~/Alcohol.csv&quot;)
+
+Happiness &lt;- read_csv(&quot;~/Happiness.csv&quot;)
+
+# As per the introduction these variables not of interest and
+# need to be reomved.
+Happiness &lt;- Happiness %&gt;% select(-`Standard Error`, -`Dystopia Residual`, 
+    -Generosity, -`Trust (Government Corruption)`)
+
+
+# Because there is most likely some variation between the two
+# datasets in terms of the spellling of countries, it is
+# necessary to assure that no countries are left out due to
+# this variation before any type of joining is performed.
+setdiff(Alcohol$country, Happiness$Country)</code></pre>
+<pre><code>##  [1] &quot;Andorra&quot;                      &quot;Antigua &amp; Barbuda&quot;           
+##  [3] &quot;Bahamas&quot;                      &quot;Barbados&quot;                    
+##  [5] &quot;Belize&quot;                       &quot;Bosnia-Herzegovina&quot;          
+##  [7] &quot;Brunei&quot;                       &quot;Cote d&#39;Ivoire&quot;               
+##  [9] &quot;Cabo Verde&quot;                   &quot;Congo&quot;                       
+## [11] &quot;Cook Islands&quot;                 &quot;Cuba&quot;                        
+## [13] &quot;North Korea&quot;                  &quot;DR Congo&quot;                    
+## [15] &quot;Dominica&quot;                     &quot;Equatorial Guinea&quot;           
+## [17] &quot;Eritrea&quot;                      &quot;Fiji&quot;                        
+## [19] &quot;Gambia&quot;                       &quot;Grenada&quot;                     
+## [21] &quot;Guinea-Bissau&quot;                &quot;Guyana&quot;                      
+## [23] &quot;Kiribati&quot;                     &quot;Maldives&quot;                    
+## [25] &quot;Marshall Islands&quot;             &quot;Micronesia&quot;                  
+## [27] &quot;Monaco&quot;                       &quot;Namibia&quot;                     
+## [29] &quot;Nauru&quot;                        &quot;Niue&quot;                        
+## [31] &quot;Palau&quot;                        &quot;Papua New Guinea&quot;            
+## [33] &quot;Russian Federation&quot;           &quot;St. Kitts &amp; Nevis&quot;           
+## [35] &quot;St. Lucia&quot;                    &quot;St. Vincent &amp; the Grenadines&quot;
+## [37] &quot;Samoa&quot;                        &quot;San Marino&quot;                  
+## [39] &quot;Sao Tome &amp; Principe&quot;          &quot;Seychelles&quot;                  
+## [41] &quot;Solomon Islands&quot;              &quot;Somalia&quot;                     
+## [43] &quot;Timor-Leste&quot;                  &quot;Tonga&quot;                       
+## [45] &quot;Trinidad &amp; Tobago&quot;            &quot;Tuvalu&quot;                      
+## [47] &quot;USA&quot;                          &quot;Vanuatu&quot;</code></pre>
+<pre class="r"><code>setdiff(Happiness$Country, Alcohol$country)</code></pre>
+<pre><code>##  [1] &quot;United States&quot;           &quot;Taiwan&quot;                 
+##  [3] &quot;Trinidad and Tobago&quot;     &quot;Russia&quot;                 
+##  [5] &quot;North Cyprus&quot;            &quot;Kosovo&quot;                 
+##  [7] &quot;Hong Kong&quot;               &quot;Somaliland region&quot;      
+##  [9] &quot;Bosnia and Herzegovina&quot;  &quot;Palestinian Territories&quot;
+## [11] &quot;Congo (Kinshasa)&quot;        &quot;Congo (Brazzaville)&quot;    
+## [13] &quot;Ivory Coast&quot;</code></pre>
+<pre class="r"><code># I found the following 3 countries to have variations in
+# their spelling so I changed their names in the Alcohol
+# dataset to mach that of the spelling in the Happiness
+# dataset.
+
+Alcohol[185, &quot;country&quot;] &lt;- &quot;United States&quot;
+
+Alcohol[22, &quot;country&quot;] &lt;- &quot;Bosnia and Herzegovina&quot;
+
+Alcohol[22, &quot;country&quot;] &lt;- &quot;Trinidad and Tobago&quot;
+
+# I decided to run a full-join to completley merge both data
+# sets together to see how certain variables from both
+# datasets might correlate and how these coorelations might
+# relate to each countries happiness rank.
+
+worlddata &lt;- Alcohol %&gt;% mutate(Country = country) %&gt;% full_join(Happiness, 
+    by = &quot;Country&quot;) %&gt;% select(-country) %&gt;% na.omit</code></pre>
+</div>
+<div id="wrangling" class="section level2">
+<h2><em>Wrangling</em></h2>
+<p>The following are summary statistics that I was specifically interested to take a peak at. I use group_by() and summarize() for the majority of the summary statistics to help me analyze alcohol consumption and happiness by region and to find the mean and standard devaition of selected variables. These summary statistics functioned to help me see in a little more detail about what the data has to say about how alcohol consumtion and happiness relate to specific regions. For example, in one of the codes below we are able to see how countries in a certain region rank for happiness while also considering alcohol consumption.</p>
+<pre class="r"><code>worlddata %&gt;% na.omit %&gt;% group_by(Region) %&gt;% summarize(mean_happiness = mean(`Happiness Score`, 
+    na.rm = T), sd_happiness = sd(`Happiness Score`, na.rm = T)) %&gt;% 
+    arrange(desc(mean_happiness))</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    Region                          mean_happiness sd_happiness
+##    &lt;chr&gt;                                    &lt;dbl&gt;        &lt;dbl&gt;
+##  1 Australia and New Zealand                 7.28      0.00141
+##  2 North America                             7.27      0.218  
+##  3 Western Europe                            6.74      0.813  
+##  4 Latin America and Caribbean               6.14      0.729  
+##  5 Eastern Asia                              5.50      0.575  
+##  6 Middle East and Northern Africa           5.44      1.12   
+##  7 Central and Eastern Europe                5.32      0.592  
+##  8 Southeastern Asia                         5.32      0.950  
+##  9 Southern Asia                             4.58      0.571  
+## 10 Sub-Saharan Africa                        4.19      0.617</code></pre>
+<pre class="r"><code>worlddata %&gt;% group_by(Region) %&gt;% summarize(mean_beers = mean(beer_servings, 
+    na.rm = T), sd_beers = sd(beer_servings, na.rm = T)) %&gt;% 
+    arrange(desc(mean_beers))</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    Region                          mean_beers sd_beers
+##    &lt;chr&gt;                                &lt;dbl&gt;    &lt;dbl&gt;
+##  1 North America                       244.       6.36
+##  2 Australia and New Zealand           232       41.0 
+##  3 Western Europe                      216.      68.9 
+##  4 Central and Eastern Europe          164.     118.  
+##  5 Latin America and Caribbean         149.      82.2 
+##  6 Eastern Asia                         93.2     31.2 
+##  7 Sub-Saharan Africa                   59.4     75.5 
+##  8 Southeastern Asia                    53.7     39.0 
+##  9 Middle East and Northern Africa      17.6     19.9 
+## 10 Southern Asia                         7.57     9.03</code></pre>
+<pre class="r"><code>worlddata %&gt;% group_by(Region) %&gt;% summarize(mean_happiness_rank = mean(`Happiness Rank`, 
+    na.rm = T), sd_happiness_rank = sd(`Happiness Rank`, na.rm = T)) %&gt;% 
+    arrange(mean_happiness_rank)</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    Region                          mean_happiness_rank sd_happiness_rank
+##    &lt;chr&gt;                                         &lt;dbl&gt;             &lt;dbl&gt;
+##  1 Australia and New Zealand                       9.5             0.707
+##  2 North America                                  10               7.07 
+##  3 Western Europe                                 27.7            28.8  
+##  4 Latin America and Caribbean                    46.9            28.7  
+##  5 Eastern Asia                                   69.2            27.1  
+##  6 Middle East and Northern Africa                76              43.8  
+##  7 Central and Eastern Europe                     79.3            27.8  
+##  8 Southeastern Asia                              81.2            39.9  
+##  9 Southern Asia                                 113.             26.6  
+## 10 Sub-Saharan Africa                            128.             22.9</code></pre>
+<pre class="r"><code>worlddata %&gt;% group_by(Region) %&gt;% summarize(mean_life_expectancy = mean(`Health (Life Expectancy)`), 
+    sd_life_expectancy = sd(`Health (Life Expectancy)`))</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    Region                          mean_life_expectancy sd_life_expectancy
+##    &lt;chr&gt;                                          &lt;dbl&gt;              &lt;dbl&gt;
+##  1 Australia and New Zealand                      0.920             0.0164
+##  2 Central and Eastern Europe                     0.721             0.0824
+##  3 Eastern Asia                                   0.844             0.178 
+##  4 Latin America and Caribbean                    0.704             0.109 
+##  5 Middle East and Northern Africa                0.708             0.110 
+##  6 North America                                  0.884             0.0310
+##  7 Southeastern Asia                              0.677             0.159 
+##  8 Southern Asia                                  0.541             0.123 
+##  9 Sub-Saharan Africa                             0.286             0.147 
+## 10 Western Europe                                 0.908             0.0273</code></pre>
+<pre class="r"><code>worlddata %&gt;% filter(Region == &quot;Western Europe&quot;) %&gt;% select(Country, 
+    `Happiness Rank`, total_litres_of_pure_alcohol) %&gt;% arrange(`Happiness Rank`)</code></pre>
+<pre><code>## # A tibble: 20 x 3
+##    Country        `Happiness Rank` total_litres_of_pure_alcohol
+##    &lt;chr&gt;                     &lt;dbl&gt;                        &lt;dbl&gt;
+##  1 Switzerland                   1                         10.2
+##  2 Iceland                       2                          6.6
+##  3 Denmark                       3                         10.4
+##  4 Norway                        4                          6.7
+##  5 Finland                       6                         10  
+##  6 Netherlands                   7                          9.4
+##  7 Sweden                        8                          7.2
+##  8 Austria                      13                          9.7
+##  9 Luxembourg                   17                         11.4
+## 10 Ireland                      18                         11.4
+## 11 Belgium                      19                         10.5
+## 12 United Kingdom               21                         10.4
+## 13 Germany                      26                         11.3
+## 14 France                       29                         11.8
+## 15 Spain                        36                         10  
+## 16 Malta                        37                          6.6
+## 17 Italy                        50                          6.5
+## 18 Cyprus                       67                          8.2
+## 19 Portugal                     88                         11  
+## 20 Greece                      102                          8.3</code></pre>
+<pre class="r"><code>worlddata %&gt;% group_by(Country) %&gt;% mutate(Total_servings = sum(beer_servings, 
+    spirit_servings, wine_servings)) %&gt;% group_by(Region) %&gt;% 
+    select(Region, `Happiness Score`, Total_servings) %&gt;% summarize(mean_total_servings = mean(Total_servings), 
+    mean_happiness_score = mean(`Happiness Score`)) %&gt;% arrange(desc(mean_happiness_score))</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    Region                          mean_total_servings mean_happiness_score
+##    &lt;chr&gt;                                         &lt;dbl&gt;                &lt;dbl&gt;
+##  1 Australia and New Zealand                     501                   7.28
+##  2 North America                                 476.                  7.27
+##  3 Western Europe                                516.                  6.74
+##  4 Latin America and Caribbean                   297.                  6.14
+##  5 Eastern Asia                                  253.                  5.50
+##  6 Middle East and Northern Africa                49.6                 5.44
+##  7 Central and Eastern Europe                    408.                  5.32
+##  8 Southeastern Asia                             128.                  5.32
+##  9 Southern Asia                                  39.6                 4.58
+## 10 Sub-Saharan Africa                             88.1                 4.19</code></pre>
+<pre class="r"><code>worlddata %&gt;% group_by(Country) %&gt;% mutate(Total_servings = sum(beer_servings, 
+    spirit_servings, wine_servings)) %&gt;% group_by(Region) %&gt;% 
+    select(Region, `Economy (GDP per Capita)`, Total_servings) %&gt;% 
+    summarize(mean_total_servings = mean(Total_servings), mean_economy = mean(`Economy (GDP per Capita)`)) %&gt;% 
+    arrange(desc(mean_total_servings))</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    Region                          mean_total_servings mean_economy
+##    &lt;chr&gt;                                         &lt;dbl&gt;        &lt;dbl&gt;
+##  1 Western Europe                                516.         1.30 
+##  2 Australia and New Zealand                     501          1.29 
+##  3 North America                                 476.         1.36 
+##  4 Central and Eastern Europe                    408.         0.945
+##  5 Latin America and Caribbean                   297.         0.877
+##  6 Eastern Asia                                  253.         1.06 
+##  7 Southeastern Asia                             128.         0.789
+##  8 Sub-Saharan Africa                             88.1        0.386
+##  9 Middle East and Northern Africa                49.6        1.09 
+## 10 Southern Asia                                  39.6        0.560</code></pre>
+</div>
+<div id="visualization" class="section level2">
+<h2><em>Visualization</em></h2>
+<p>The following graph relates the Mean Alcohol Servings and Mean Happiness Score for Each of the 8 Regions (Regions rather than countries are much easier to handle and visualize for this purpose). The Mean Alcohol Servings is the mean serving of each type of beverage (beer, spirit, and wine) combined. The graph shows that there is actually a positive, mostly linear correlation between Mean Happiness Score and Mean Alcohol Servings, that is to say that regions that consume more alcohol servings on average have a higher happiness score. My speculation that regions with higher alcohol comsumption would lead to less happiness does not hold here, but it is obvoius that countries more toward the top right quadrant of the graph are more developed so there are obviously many other factors that dictate happiness.</p>
+<pre class="r"><code>worlddata %&gt;% group_by(Country) %&gt;% mutate(Total_servings = sum(beer_servings, 
+    spirit_servings, wine_servings)) %&gt;% group_by(Region) %&gt;% 
+    select(Region, `Happiness Score`, Total_servings) %&gt;% summarize(mean_total_servings = mean(Total_servings), 
+    mean_happiness_score = mean(`Happiness Score`)) %&gt;% arrange(desc(mean_happiness_score)) %&gt;% 
+    ggplot(aes(x = mean_happiness_score, y = mean_total_servings, 
+        color = Region)) + scale_color_brewer(palette = &quot;RdYlBu&quot;) + 
+    labs(x = &quot;Mean Happiness Score&quot;, y = &quot;Mean Alcohol Servings&quot;, 
+        title = &quot;Relationship Between Happiness and Alcohol Consumption&quot;) + 
+    geom_point(size = 8) + theme_minimal() + xlim(4, 7.5) + ylim(0, 
+    600)</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>With what I noticed in the prevoius visualization, I thought it was important to graph happiness, life expectancy, and gdp per capita to see how these variabnles related to eachother independent of alcohol consumption. In the graph below, we can see that, in fact, countries with higher Happiness Scores have higher gdp per capita as well as higher life expectancy.</p>
+<pre class="r"><code>ggplot(worlddata, aes(x = worlddata$`Happiness Score`, y = worlddata$`Health (Life Expectancy)`, 
+    color = `Economy (GDP per Capita)`)) + scale_color_gradient(low = &quot;gold&quot;, 
+    high = &quot;darkmagenta&quot;) + labs(x = &quot;Happiness Score&quot;, y = &quot;Life Expectancy&quot;, 
+    title = &quot;Relationship Between Happiness Score and Life Expectancy&quot;) + 
+    geom_point(size = 2.5, alpha = 0.8) + theme_minimal()</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Just for fun because I prefer wine when I have a drink, I went with the following bar graph which shows the mean wine servings according to Region. From this graph we see that Australia and New Zealand and Western Europe have by far the highest consumption of wine at a little under 200 servings. In comparison, Southern Asia and the Middle East and Northern Africa have the lowest wine consumption at around 10 servings or less.</p>
+<pre class="r"><code>ggplot(worlddata, aes(Region)) + geom_bar(aes(y = worlddata$wine_servings, 
+    fill = Region), stat = &quot;summary&quot;, fun.y = &quot;mean&quot;) + scale_fill_brewer(palette = &quot;RdYlBu&quot;) + 
+    scale_x_discrete(labels = c(&quot;ANZ&quot;, &quot;CEE&quot;, &quot;EA&quot;, &quot;LAC&quot;, &quot;MENA&quot;, 
+        &quot;NA&quot;, &quot;SEA&quot;, &quot;SA&quot;, &quot;SSA&quot;, &quot;WE&quot;)) + labs(x = &quot;Region&quot;, 
+    y = &quot;Wine Servings&quot;, title = &quot;Average Wine Servings by World Region&quot;) + 
+    theme_minimal()</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="dimensionality-reduction" class="section level2">
+<h2><em>Dimensionality Reduction</em></h2>
+<pre class="r"><code>summary(worlddata)</code></pre>
+<pre><code>##  beer_servings   spirit_servings  wine_servings    total_litres_of_pure_alcohol
+##  Min.   :  0.0   Min.   :  0.00   Min.   :  0.00   Min.   : 0.000              
+##  1st Qu.: 20.0   1st Qu.:  6.00   1st Qu.:  1.00   1st Qu.: 1.350              
+##  Median : 77.0   Median : 67.00   Median :  9.00   Median : 4.700              
+##  Mean   :110.3   Mean   : 78.72   Mean   : 55.58   Mean   : 4.956              
+##  3rd Qu.:193.5   3rd Qu.:122.00   3rd Qu.: 85.00   3rd Qu.: 8.200              
+##  Max.   :361.0   Max.   :373.00   Max.   :370.00   Max.   :14.400              
+##    Country             Region          Happiness Rank   Happiness Score
+##  Length:147         Length:147         Min.   :  1.00   Min.   :2.839  
+##  Class :character   Class :character   1st Qu.: 38.00   1st Qu.:4.534  
+##  Mode  :character   Mode  :character   Median : 79.00   Median :5.253  
+##                                        Mean   : 78.54   Mean   :5.399  
+##                                        3rd Qu.:118.50   3rd Qu.:6.298  
+##                                        Max.   :158.00   Max.   :7.587  
+##  Economy (GDP per Capita)     Family       Health (Life Expectancy)
+##  Min.   :0.0153           Min.   :0.0000   Min.   :0.0000          
+##  1st Qu.:0.5460           1st Qu.:0.8580   1st Qu.:0.4539          
+##  Median :0.9186           Median :1.0352   Median :0.6980          
+##  Mean   :0.8510           Mean   :0.9939   Mean   :0.6328          
+##  3rd Qu.:1.1570           3rd Qu.:1.2218   3rd Qu.:0.8104          
+##  Max.   :1.6904           Max.   :1.4022   Max.   :1.0252          
+##     Freedom      
+##  Min.   :0.0000  
+##  1st Qu.:0.3304  
+##  Median :0.4402  
+##  Mean   :0.4334  
+##  3rd Qu.:0.5549  
+##  Max.   :0.6697</code></pre>
+<pre class="r"><code># Here, I removed the variable Happiness Rank because it
+# essentially gives us the same information as Happiness
+# Score but in a ranked form.
+revisedworlddata &lt;- worlddata %&gt;% select(-`Happiness Rank`)
+
+worlddata_nums &lt;- revisedworlddata %&gt;% select_if(is.numeric) %&gt;% 
+    scale
+
+rownames(worlddata_nums) &lt;- revisedworlddata$Country
+
+worlddata_pca &lt;- princomp(worlddata_nums)
+
+names(worlddata_pca)</code></pre>
+<pre><code>## [1] &quot;sdev&quot;     &quot;loadings&quot; &quot;center&quot;   &quot;scale&quot;    &quot;n.obs&quot;    &quot;scores&quot;   &quot;call&quot;</code></pre>
+<pre class="r"><code>summary(worlddata_pca, loadings = T)</code></pre>
+<pre><code>## Importance of components:
+##                           Comp.1    Comp.2     Comp.3     Comp.4     Comp.5
+## Standard deviation     2.2384627 1.1396351 0.88087282 0.84264687 0.67154827
+## Proportion of Variance 0.5605595 0.1452960 0.08680573 0.07943524 0.05045177
+## Cumulative Proportion  0.5605595 0.7058555 0.79266119 0.87209643 0.92254820
+##                            Comp.6     Comp.7    Comp.8      Comp.9
+## Standard deviation     0.55243516 0.39669424 0.3880060 0.281468764
+## Proportion of Variance 0.03414166 0.01760491 0.0168422 0.008863033
+## Cumulative Proportion  0.95668986 0.97429477 0.9911370 1.000000000
+## 
+## Loadings:
+##                              Comp.1 Comp.2 Comp.3 Comp.4 Comp.5 Comp.6 Comp.7
+## beer_servings                -0.352 -0.340  0.107 -0.241 -0.227  0.651 -0.164
+## spirit_servings              -0.255 -0.409 -0.671         0.402 -0.213  0.166
+## wine_servings                -0.311 -0.187  0.681         0.210 -0.478  0.114
+## total_litres_of_pure_alcohol -0.353 -0.461        -0.223                     
+## Happiness Score              -0.374  0.357               -0.155         0.678
+## Economy (GDP per Capita)     -0.377  0.205         0.409 -0.114  0.180  0.159
+## Family                       -0.357  0.142 -0.240 -0.161 -0.612 -0.495 -0.381
+## Health (Life Expectancy)     -0.357  0.200         0.497  0.349  0.128 -0.536
+## Freedom                      -0.229  0.490        -0.667  0.458        -0.112
+##                              Comp.8 Comp.9
+## beer_servings                -0.113  0.419
+## spirit_servings                      0.279
+## wine_servings                        0.339
+## total_litres_of_pure_alcohol        -0.772
+## Happiness Score              -0.483       
+## Economy (GDP per Capita)      0.760       
+## Family                                    
+## Health (Life Expectancy)     -0.363 -0.168
+## Freedom                       0.196</code></pre>
+<pre class="r"><code>eigval &lt;- worlddata_pca$sdev^2
+
+# I decided to use the first two PC because their eigenvalues
+# are greater than 1 in accordance with Kaiser&#39;s rule
+eigval</code></pre>
+<pre><code>##     Comp.1     Comp.2     Comp.3     Comp.4     Comp.5     Comp.6     Comp.7 
+## 5.01071530 1.29876822 0.77593693 0.71005374 0.45097708 0.30518460 0.15736632 
+##     Comp.8     Comp.9 
+## 0.15054866 0.07922467</code></pre>
+<pre class="r"><code># This allows for me to highlight that PC2 involves a sort of
+# trade-off between the Freedom and Spirit Servings
+# Variables. This could indicate that Countries with lower
+# spirit servings have a higher feeling of freedom. For PC1,
+# I speculate that it is GDP and Freedom as they are the most
+# distant from each other.
+worlddata_pca$loadings[1:9, 1:2] %&gt;% as.data.frame %&gt;% rownames_to_column %&gt;% 
+    ggplot() + geom_hline(aes(yintercept = 0), lty = 2) + geom_vline(aes(xintercept = 0), 
+    lty = 2) + ylab(&quot;PC2&quot;) + xlab(&quot;PC1&quot;) + geom_segment(aes(x = 0, 
+    y = 0, xend = Comp.1, yend = Comp.2), arrow = arrow(), col = &quot;darkcyan&quot;) + 
+    geom_label(aes(x = Comp.1 * 1.1, y = Comp.2 * 1.1, label = rowname))</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>worlddatadf &lt;- data.frame(PC1 = worlddata_pca$scores[, 1], PC2 = worlddata_pca$scores[, 
+    2])
+
+ggplot(worlddatadf, aes(PC1, PC2)) + geom_point()</code></pre>
+<p><img src="/Project1_files/figure-html/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The codes below show the top and bottom 5 countries in principle componet one, and the and bottom 5 countries in principle component 2.</p>
+<pre class="r"><code>Country &lt;- revisedworlddata$Country
+
+worlddata_pca$scores %&gt;% as.data.frame %&gt;% cbind(Country, .) %&gt;% 
+    top_n(5, Comp.1)</code></pre>
+<pre><code>##                    Country   Comp.1     Comp.2    Comp.3     Comp.4     Comp.5
+## 1              Afghanistan 4.046096 -0.6160643 0.6931156  0.4713335  0.5260902
+## 2                  Burundi 3.819206 -2.4051345 0.8948922 -0.1437768 -0.1980373
+## 3 Central African Republic 4.353661 -0.5116282 0.9802181 -1.3529993  1.6584139
+## 4                   Guinea 3.769011 -0.2276669 0.5655201 -0.5642278  0.5322595
+## 5                     Togo 4.106347 -0.8985864 1.0753506 -0.3324979  1.3626019
+##      Comp.6      Comp.7       Comp.8       Comp.9
+## 1 0.4757116  0.41235735  0.043534639  0.167930155
+## 2 0.5603557 -0.04301479 -0.284156484 -0.640570376
+## 3 0.9503993  1.12461709  0.263908831 -0.006673047
+## 4 0.1802393  0.20439488 -0.004083102  0.262377324
+## 5 0.8019414  0.09779488  0.326432738  0.157288777</code></pre>
+<pre class="r"><code>worlddata_pca$scores %&gt;% as.data.frame %&gt;% cbind(Country, .) %&gt;% 
+    top_n(5, wt = desc(Comp.1))</code></pre>
+<pre><code>##       Country    Comp.1     Comp.2    Comp.3      Comp.4      Comp.5     Comp.6
+## 1     Denmark -3.997472  0.4525251 1.5791073 -0.56742121  0.10719965 -0.6687199
+## 2     Germany -3.877735 -0.3790293 0.6951259 -0.74081601 -0.07704321  0.6412416
+## 3     Ireland -3.908972 -0.1551703 0.5016410 -0.70837321 -0.19162629  0.3824035
+## 4  Luxembourg -4.143757 -0.1602232 1.2862824 -0.07639764  0.60826546 -0.3633675
+## 5 Switzerland -4.110119  0.6585633 1.3937748 -0.30592054  0.43523955 -0.8807891
+##       Comp.7      Comp.8      Comp.9
+## 1  0.4322440 -0.18104442  0.11663124
+## 2 -0.1925778  0.00862704  0.15132234
+## 3 -0.1421526 -0.02012720 -0.03338151
+## 4  0.4033977  0.44428592  0.08523403
+## 5  0.4528205 -0.10108655  0.02499376</code></pre>
+<pre class="r"><code>worlddata_pca$scores %&gt;% as.data.frame %&gt;% cbind(Country, .) %&gt;% 
+    top_n(5, Comp.2)</code></pre>
+<pre><code>##     Country     Comp.1   Comp.2     Comp.3    Comp.4       Comp.5       Comp.6
+## 1    Kuwait -0.2014435 2.680050 -0.2210388 0.7528966 -0.496170541 -0.002610599
+## 2  Malaysia  0.4483817 2.070044 -0.1275663 0.4169192 -0.178774034  0.001062397
+## 3      Oman -0.4587761 2.752142 -0.2829551 0.2708393 -0.002804969  0.226846696
+## 4     Qatar -0.8034860 2.796095 -0.4455645 0.6979156  0.208340087  0.148862312
+## 5 Singapore -0.9893542 2.487331 -0.0443061 1.2766797  0.118830766  0.709852664
+##        Comp.7    Comp.8       Comp.9
+## 1  0.13667875 0.9823154  0.004038849
+## 2 -0.19592669 0.3546576  0.003741640
+## 3  0.36719718 0.4297171 -0.056566205
+## 4  0.37893273 1.1525798 -0.071755565
+## 5 -0.07172734 0.2212489 -0.236848029</code></pre>
+<pre class="r"><code>worlddata_pca$scores %&gt;% as.data.frame %&gt;% cbind(Country, .) %&gt;% 
+    top_n(5, wt = desc(Comp.2))</code></pre>
+<pre><code>##     Country    Comp.1    Comp.2     Comp.3      Comp.4     Comp.5     Comp.6
+## 1   Belarus -2.552027 -2.477249 -2.5544355  0.07018004  0.7552835 -0.8081778
+## 2  Bulgaria -1.519353 -2.544938 -0.9053764  0.45053379  0.3859582 -0.1071048
+## 3   Burundi  3.819206 -2.405135  0.8948922 -0.14377678 -0.1980373  0.5603557
+## 4     Haiti  1.489618 -2.426299 -2.3540007  0.18607883  1.2666653 -1.1045295
+## 5 Lithuania -2.619352 -2.787245 -1.1837056  0.44539206 -0.9084481  0.6872947
+##        Comp.7     Comp.8     Comp.9
+## 1  0.47948670  0.2083300 -0.8173440
+## 2 -0.67718074  0.4563674  0.1659128
+## 3 -0.04301479 -0.2841565 -0.6405704
+## 4  0.91002085 -0.3312945  0.1443512
+## 5  0.04592068 -0.1058749 -0.1080182</code></pre>
+</div>

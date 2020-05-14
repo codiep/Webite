@@ -1,0 +1,23 @@
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ [K]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ ls
+config.toml  [0m[01;34mcontent[0m  index.Rmd  [01;34mpublic[0m  [01;34mstatic[0m  [01;34mthemes[0m  Website.Rproj
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ get init
+
+Command 'get' not found, but there are 18 similar ones.
+
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git init
+Initialized empty Git repository in /stor/home/cap4497/Website/.git/
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ is -a 
+is: command not found
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ ls -a
+[0m[01;34m.[0m   config.toml  [01;34m.git[0m       [01;34mpublic[0m       [01;34mstatic[0m  Website.Rproj
+[01;34m..[0m  [01;34mcontent[0m      index.Rmd  [01;34m.Rproj.user[0m  [01;34mthemes[0m
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ get add. 
+
+Command 'get' not found, but there are 18 similar ones.
+
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git add.
+git: 'add.' is not a git command. See 'git --help'.
+
+The most similar command is
+	add
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ get ad [Kd [K[K[K[K[K[K[K[Kit add [K[K[K[K[K[K[Kgit add . 
