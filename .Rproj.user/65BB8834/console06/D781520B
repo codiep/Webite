@@ -247,3 +247,32 @@ remote: Resolving deltas:   0% (0/40)[Kremote: Resolving deltas:   2% (1/40)[
 To https://github.com/codiep/Webite.git
  * [new branch]      master -> master
 ]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git add . 
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ ge[Kit commit -m "second thing" [K
+[master 6aab6dc] second thing
+ Committer: Codie Price <cap4497@educcomp01.ccbb.utexas.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 226 insertions(+)
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git push origin master
+Username for 'https://github.com': git add .
+
+git commit -m "any message, but you must have a message"
+
+git push origin master
+Password for 'https://git add .@github.com': 
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/codiep/Webite.git/'
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git add
+Nothing specified, nothing added.
+Maybe you wanted to say 'git add .'?
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git add .
