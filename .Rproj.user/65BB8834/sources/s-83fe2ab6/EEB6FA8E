@@ -5,13 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "31607842",
+    "hash" : "2239832351",
     "id" : "EEB6FA8E",
-    "lastKnownWriteTime" : 1589418531,
-    "last_content_update" : 1589418531,
+    "lastKnownWriteTime" : 1589581721,
+    "last_content_update" : 1589581721356,
     "path" : "~/Website/content/blog/2020-05-13-python.md",
     "project_path" : "content/blog/2020-05-13-python.md",
     "properties" : {
+        "cursorPosition" : "9,75",
+        "scrollLine" : "0"
     },
     "relative_order" : 9,
     "source_on_save" : false,

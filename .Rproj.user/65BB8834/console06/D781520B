@@ -276,3 +276,40 @@ fatal: Authentication failed for 'https://github.com/codiep/Webite.git/'
 Nothing specified, nothing added.
 Maybe you wanted to say 'git add .'?
 ]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git add .
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git commit -m "any message, but you must have a messsage"
+[master 6e7b10f] any message, but you must have a message
+ Committer: Codie Price <cap4497@educcomp01.ccbb.utexas.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 16 files changed, 306 insertions(+), 117 deletions(-)
+ rewrite .Rproj.user/65BB8834/console06/INDEX001 (69%)
+ create mode 100644 .Rproj.user/65BB8834/sources/prop/FFDFA7C4
+ create mode 100644 .Rproj.user/65BB8834/sources/s-83fe2ab6/1A616811
+ create mode 100644 .Rproj.user/65BB8834/sources/s-83fe2ab6/1A616811-contents
+ delete mode 100644 .Rproj.user/65BB8834/sources/s-83fe2ab6/1ADA3CA6
+ delete mode 100644 .Rproj.user/65BB8834/sources/s-83fe2ab6/F19F555
+ delete mode 100644 .Rproj.user/65BB8834/sources/s-83fe2ab6/F446D610
+ delete mode 100644 .Rproj.user/shared/notebooks/2FA5C326-Project2/1/65BB883483fe2ab6/chunks.json
+ delete mode 100644 .Rproj.user/shared/notebooks/95AC54DA-Project1/1/65BB883483fe2ab6/chunks.json
+]0;/stor/home/cap4497/Website]0;cap4497@educcomp01: ~/Website[01;32mcap4497@educcomp01[00m:[01;34m~/Website[00m$ git push origin master
+Username for 'https://github.com': codiep
+Password for 'https://codiep@github.com': 
+Counting objects: 35, done.
+Delta compression using up to 16 threads.
+Compressing objects:   3% (1/27)   Compressing objects:   7% (2/27)   Compressing objects:  11% (3/27)   Compressing objects:  14% (4/27)   Compressing objects:  18% (5/27)   Compressing objects:  22% (6/27)   Compressing objects:  25% (7/27)   Compressing objects:  29% (8/27)   Compressing objects:  33% (9/27)   Compressing objects:  37% (10/27)   Compressing objects:  40% (11/27)   Compressing objects:  44% (12/27)   Compressing objects:  48% (13/27)   Compressing objects:  51% (14/27)   Compressing objects:  55% (15/27)   Compressing objects:  59% (16/27)   Compressing objects:  62% (17/27)   Compressing objects:  66% (18/27)   Compressing objects:  70% (19/27)   Compressing objects:  74% (20/27)   Compressing objects:  77% (21/27)   Compressing objects:  81% (22/27)   Compressing objects:  85% (23/27)   Compressing objects:  88% (24/27)   Compressing objects:  92% (25/27)   Compressing objects:  96% (26/27)   Compressing objects: 100% (27/27)   Compressing objects: 100% (27/27), done.
+Writing objects:   2% (1/35)   Writing objects:   5% (2/35)   Writing objects:   8% (3/35)   Writing objects:  11% (4/35)   Writing objects:  14% (5/35)   Writing objects:  17% (6/35)   Writing objects:  20% (7/35)   Writing objects:  22% (8/35)   Writing objects:  25% (9/35)   Writing objects:  28% (10/35)   Writing objects:  31% (11/35)   Writing objects:  34% (12/35)   Writing objects:  37% (13/35)   Writing objects:  40% (14/35)   Writing objects:  42% (15/35)   Writing objects:  45% (16/35)   Writing objects:  48% (17/35)   Writing objects:  51% (18/35)   Writing objects:  54% (19/35)   Writing objects:  57% (20/35)   Writing objects:  60% (21/35)   Writing objects:  62% (22/35)   Writing objects:  65% (23/35)   Writing objects:  68% (24/35)   Writing objects:  71% (25/35)   Writing objects:  74% (26/35)   Writing objects:  77% (27/35)   Writing objects:  80% (28/35)   Writing objects:  82% (29/35)   Writing objects:  85% (30/35)   Writing objects:  88% (31/35)   Writing objects:  91% (32/35)   Writing objects:  94% (33/35)   Writing objects:  97% (34/35)   Writing objects: 100% (35/35)   Writing objects: 100% (35/35), 7.56 KiB | 968.00 KiB/s, done.
+Total 35 (delta 14), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/14)[Kremote: Resolving deltas:   7% (1/14)[Kremote: Resolving deltas:  21% (3/14)[Kremote: Resolving deltas:  35% (5/14)[Kremote: Resolving deltas:  42% (6/14)[Kremote: Resolving deltas:  50% (7/14)[Kremote: Resolving deltas:  57% (8/14)[Kremote: Resolving deltas:  64% (9/14)[Kremote: Resolving deltas:  71% (10/14)[Kremote: Resolving deltas:  78% (11/14)[Kremote: Resolving deltas:  85% (12/14)[Kremote: Resolving deltas:  92% (13/14)[Kremote: Resolving deltas: 100% (14/14)[Kremote: Resolving deltas: 100% (14/14), completed with 11 local objects.[K
+To https://github.com/codiep/Webite.git
+   9d65f13..6e7b10f  master -> master
+git add .
